@@ -1,0 +1,14 @@
+langchain
+langgraph
+chromadb
+rank_bm25
+transformers
+sentence-transformers
+einops
+google-genai
+ragas
+langchain-community
+python-dotenv
+atlassian-python-api
+lxml
+llama-cpp-python
