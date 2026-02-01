@@ -12,3 +12,4 @@ python-dotenv
 atlassian-python-api
 lxml
 llama-cpp-python
+markdownify
