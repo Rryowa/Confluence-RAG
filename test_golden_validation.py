@@ -1,3 +1,4 @@
+import argparse
 import rag_runtime
 from rag_runtime import RAGRuntime
 import time
@@ -5,7 +6,7 @@ import time
 # --- Configuration ---
 # Override model to a more stable/higher-quota model for testing
 # (gemini-3-pro-preview hits free-tier quota too quickly for interactive testing)
-rag_runtime.DEFAULT_GEMINI_MODEL = "gemini-3-flash-preview"
+rag_runtime.DEFAULT_GEMINI_MODEL = "gemini-3-pro-preview"
 
 # Golden Dataset (Mini)
 TEST_CASES = [
@@ -23,18 +24,20 @@ TEST_CASES = [
     }
 ]
 
-def run_validation():
-    print(f"--- Starting Golden Dataset Validation (Model: {rag_runtime.DEFAULT_GEMINI_MODEL}) ---\n")
+def run_validation(reasoning: str):
+    print(f"--- Starting Golden Dataset Validation (Model: {rag_runtime.DEFAULT_GEMINI_MODEL}) ---")
+    print(f"--- Reasoning Mode: {reasoning} ---\n")
     runtime = RAGRuntime()
     
+    is_deep = reasoning.lower() == "true"
+    mode = "DEEP" if is_deep else "FAST"
+
     for case in TEST_CASES:
         print(f"\n>>> Test Case: {case['id']} ({case['track_hint']})")
         print(f"Query: {case['query']}")
         
         start_time = time.time()
-        # We let the router decide, but we expect it to match hint. 
-        # Or we can force it? Let's test the Router too.
-        answer, docs = runtime.query(case['query'])
+        answer, docs = runtime.query(case['query'], force_mode=mode)
         duration = time.time() - start_time
         
         print(f"\n[Generated Answer ({duration:.2f}s)]:")
@@ -56,4 +59,15 @@ def run_validation():
     print("\n--- Validation Complete ---")
 
 if __name__ == "__main__":
-    run_validation()
+    # --- Argument Parsing ---
+    parser = argparse.ArgumentParser(description="Run RAG Golden Dataset Validation.")
+    parser.add_argument(
+        "--reasoning", 
+        type=str, 
+        required=True, 
+        choices=["true", "false", "True", "False"], 
+        help="Enable deep reasoning (true/false) for validation."
+    )
+    args = parser.parse_args()
+    
+    run_validation(reasoning=args.reasoning)
